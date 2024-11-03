@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+    <h1>Pokedex mamalona</h1>
+    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+        <div class="mb-4">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Buscar por ID" class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="searchPokemon()" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="flex justify-center mb-4">
+            <img id="pokemonImage" src="https://via.placeholder.com/200x200.png?text=Pokemon" alt="Pokemon" class="w-48 h-48 object-contain">
+        </div>
+        <div class="text-center mb-4">
+            <h2 id="pokemonName" class="text-xl font-bold mb-2">Nombre: Charizard</h2>
+            <p id="pokemonType" class="text-gray-600">Tipo: Fuego / Volador</p>
+        </div>
+        <div class="flex justify-between">
+            <button onclick="getPreviousPokemon()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                ANTERIOR POKEMON
+            </button>
+            <button onclick="getNextPokemon()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                SIGUIENTE POKEMON
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentPokemonId = 6; // Starting with Charizard
+
+        async function fetchPokemon(id) {
+            try {
+                const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
+                const pokemon = response.data;
+                
+                document.getElementById('pokemonImage').src = pokemon.sprites.front_default;
+                document.getElementById('pokemonName').textContent = `Nombre: ${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}`;
+                document.getElementById('pokemonType').textContent = `Tipo: ${pokemon.types.map(type => type.type.name.charAt(0).toUpperCase() + type.type.name.slice(1)).join(' / ')}`;
+                
+                currentPokemonId = pokemon.id;
+            } catch (error) {
+                console.error('Error fetching Pokemon:', error);
+            }
+        }
+
+        function searchPokemon() {
+            const searchInput = document.getElementById('searchInput');
+            const pokemonId = parseInt(searchInput.value);
+            if (pokemonId && pokemonId > 0) {
+                fetchPokemon(pokemonId);
+            }
+        }
+
+        function getPreviousPokemon() {
+            if (currentPokemonId > 1) {
+                fetchPokemon(currentPokemonId - 1);
+            }
+        }
+
+        function getNextPokemon() {
+            fetchPokemon(currentPokemonId + 1);
+        }
+
+        // Initialize with Charizard
+        fetchPokemon(currentPokemonId);
+    </script>
+</body>
+</html>
